@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.scnu.lims.dao.DeviceApplyMapper">
+    
+    <resultMap id="getDeviceApplyWithUserAndDevice" type="edu.scnu.lims.entity.DeviceApply">
+        <id property="deviceApplyId" column="device_apply_id"/>
+        <result property="borrowReason" column="borrow_reason"/>
+        <result property="promiseTimestamp" column="promise_timestamp"/>
+        <result property="applyTimestamp" column="apply_timestamp"/>
+        <result property="grantTimestamp" column="grant_timestamp"/>
+        <result property="returnTimestamp" column="return_timestamp"/>
+        <result property="finishTimestamp" column="finish_timestamp"/>
+        <result property="status" column="status"/>
+        <association property="user" javaType="edu.scnu.lims.entity.User">
+            <id property="userId" column="user_id"/>
+            <result property="name" column="userName"/>
+        </association>
+        <association property="device" javaType="edu.scnu.lims.entity.Device">
+            <id property="deviceId" column="device_id"/>
+            <result property="name" column="deviceName"/>
+            <result property="imageUrl" column="image_url"/>
+        </association>
+    </resultMap>
+
+    <select id="findDeviceApply" parameterType="edu.scnu.lims.entity.User" resultMap="getDeviceApplyWithUserAndDevice">
+        select device_apply.*,user.name userName,device.name deviceName,device.image_url from device_apply,user,device
+        where (device_apply.user_id=#{userId} and device_apply.user_id=user.user_id
+            and device_apply.device_id=device.device_id)
+           or (device_apply.device_id in (select device_apply.device_id from laboratory,device,device_apply where laboratory.user_id=#{userId}
+                                                                                                              and laboratory.laboratory_id=device.laboratory_id
+                                                                                                              and device.device_id=device_apply.device_id)
+            and device_apply.user_id=user.user_id
+            and device_apply.device_id=device.device_id);
+    </select>
+
+</mapper>

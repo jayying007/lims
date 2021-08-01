@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.scnu.lims.dao.TopDeviceMapper">
+
+    <select id="getTopDevice" resultType="edu.scnu.lims.entity.TopDevice">
+        select apply.device_id as deviceId,device.name as deviceName,laboratory.name as laboratoryName,applyCount
+        from device,laboratory,(select device_id,count(*) as applyCount from device_apply group by device_id) as apply
+        where apply.device_id=device.device_id
+          and device.laboratory_id=laboratory.laboratory_id
+        order by applyCount desc;
+    </select>
+
+</mapper>

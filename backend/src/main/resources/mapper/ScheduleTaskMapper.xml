@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.scnu.lims.dao.ScheduleTaskMapper">
+
+    <select id="getRemindRecord" resultType="edu.scnu.lims.entity.RemindObject">
+        select user.email,device.name as deviceName from user,device,device_apply apply,(select max(record_timestamp) as record_timestamp,device_id from device_record group by device_id) record
+        where user.user_id=apply.user_id
+          and apply.status='GRANTED'
+          and apply.device_id=record.device_id
+          and apply.device_id=device.device_id
+          and unix_timestamp()*1000-record.record_timestamp > 1000*3600*24*3;
+    </select>
+
+    <select id="getRemindReturn" resultType="edu.scnu.lims.entity.RemindObject">
+        select user.email,device.name as deviceName from user,device,device_apply
+        where user.user_id = device_apply.user_id
+          and device_apply.device_id = device.device_id
+          and device_apply.status='GRANTED'
+          and unix_timestamp()*1000 > device_apply.promise_timestamp;
+    </select>
+</mapper>
